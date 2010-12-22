@@ -4,7 +4,8 @@ from osgeo import ogr
 from random import randrange
 
 def new_shpfile(shpfile):
-    #In the future I will need to add an arg to this function to generate a new shapefile name vice a static one
+    #Looking for a better way to dynamically generate filenames than randrange.
+    #This function does some of the rather esoteric file manipulation that osgeo requires.
     ds = ogr.Open(shpfile, 1)
     lyr = ds.GetLayerByName(shpfile.split('.')[0])
     driver = ogr.GetDriverByName('ESRI Shapefile')
@@ -15,12 +16,17 @@ def new_shpfile(shpfile):
     return new_lyr, newfile
  
 def cust_fielddefn(field):
+    #This function returns a Field Definition object to write_custom_field() to be used to write to the File object
+    #returned by new_shpfile()
     fieldDefn = ogr.FieldDefn(field, ogr.OFTInteger)
     fieldDefn.SetWidth(14)
     fieldDefn.SetPrecision(6)
     return fieldDefn
 
 def write_custom_field(shpfile, cust_field_name):
+    #This function sets the state of the shapefile to one in which it can be manipulated
+    #by user-inputted values (via csv), which will then be rendered by MapServer (eventually)
+    #to the web page.
     ''' This function writes the custom field definition to the layer of the shapefile. Format is write_custom_field(<shapefile name.ext>, <custom field name>).
     Example: write_custom_field('home/user/example.shp', 'foo')'''
     lyr, outfile = new_shpfile(shpfile)
